@@ -1,0 +1,70 @@
+import React, { useState } from 'react';
+import { Phone, AlertTriangle } from 'lucide-react';
+
+export const EmergencyButton: React.FC = () => {
+    const [showModal, setShowModal] = useState(false);
+    const [isCalling, setIsCalling] = useState(false);
+
+    const handleConfirm = async () => {
+        setIsCalling(true);
+        try {
+            await fetch('/api/emergency/trigger', {
+                method: 'POST',
+            });
+            // Mock delay
+            setTimeout(() => {
+                setIsCalling(false);
+                setShowModal(false);
+                alert("Emergency services notified (Mock).");
+            }, 2000);
+        } catch (error) {
+            console.error("Failed to trigger emergency", error);
+            setIsCalling(false);
+        }
+    };
+
+    return (
+        <>
+            <button
+                onClick={() => setShowModal(true)}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-transform active:scale-95"
+            >
+                <Phone className="w-6 h-6" />
+                EMERGENCY SOS
+            </button>
+
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-gray-900 border border-red-500/50 p-6 rounded-2xl w-full max-w-sm shadow-2xl">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="bg-red-500/20 p-4 rounded-full mb-4">
+                                <AlertTriangle className="w-12 h-12 text-red-500" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-white mb-2">Confirm SOS?</h3>
+                            <p className="text-gray-400 mb-6">
+                                This will alert your emergency contacts and share your location.
+                            </p>
+
+                            <div className="flex w-full gap-3">
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="flex-1 py-3 bg-gray-800 text-white rounded-lg font-semibold"
+                                    disabled={isCalling}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleConfirm}
+                                    className="flex-1 py-3 bg-red-600 text-white rounded-lg font-semibold animate-pulse"
+                                    disabled={isCalling}
+                                >
+                                    {isCalling ? "Calling..." : "CALL NOW"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
