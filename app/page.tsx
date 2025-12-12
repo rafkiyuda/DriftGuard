@@ -1,5 +1,6 @@
 import { Dashboard } from '@/app/components/alerts/Dashboard';
 
 export default function Home() {
-    return <Dashboard />;
+    const apiKey = process.env.GEMINI_API_KEY || '';
+    return <Dashboard apiKey={apiKey} />;
 }

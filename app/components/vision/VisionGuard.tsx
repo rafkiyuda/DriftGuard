@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useDrowsinessDetection } from '@/app/hooks/useDrowsinessDetection';
 import { useDriverStore } from '@/app/store/useDriverStore';
 
-export const VisionGuard: React.FC = () => {
+export const VisionGuard: React.FC = React.memo(() => {
     const { videoRef, startCamera, isReady } = useDrowsinessDetection();
     const { isMonitoring, status, ear } = useDriverStore();
 
@@ -45,4 +45,4 @@ export const VisionGuard: React.FC = () => {
             />
         </div>
     );
-};
+});

@@ -153,10 +153,15 @@ export function useDrowsinessDetection() {
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
                     // Prevent "The play() request was interrupted" error
-                    try {
-                        await videoRef.current.play();
-                    } catch (e) {
-                        console.log("Video play interrupted/failed", e);
+                    if (videoRef.current.paused) {
+                        try {
+                            await videoRef.current.play();
+                        } catch (e: any) {
+                            // Ignore AbortError which happens when video is interrupted by new load
+                            if (e.name !== 'AbortError') {
+                                console.warn("Video play failed:", e);
+                            }
+                        }
                     }
                 }
             } catch (err) {

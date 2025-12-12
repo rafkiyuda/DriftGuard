@@ -7,12 +7,21 @@ import { StatusBadge } from '@/app/components/alerts/StatusBadge';
 import { EmergencyButton } from '@/app/components/emergency/EmergencyButton';
 import { useAlertSound } from '@/app/hooks/useAlertSound';
 import { Car, Play, Settings } from 'lucide-react';
+import { VoiceAssistant } from '@/app/components/voice/VoiceAssistant';
+import { SettingsModal } from '@/app/components/settings/SettingsModal';
 
-export const Dashboard: React.FC = () => {
+interface DashboardProps {
+    apiKey: string;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ apiKey }) => {
     const [hasStarted, setHasStarted] = useState(false);
-    const { status, setIsMonitoring, isMonitoring } = useDriverStore();
+    const status = useDriverStore((state) => state.status);
+    const isMonitoring = useDriverStore((state) => state.isMonitoring);
+    const setIsMonitoring = useDriverStore((state) => state.setIsMonitoring);
     const { initAudio } = useAlertSound();
     const [debugMode, setDebugMode] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const handleStart = () => {
         initAudio();
@@ -39,7 +48,13 @@ export const Dashboard: React.FC = () => {
 
     if (!hasStarted) {
         return (
-            <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-black text-white text-center">
+            <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-black text-white text-center relative">
+                <button
+                    onClick={() => setIsSettingsOpen(true)}
+                    className="absolute top-6 right-6 p-2 text-gray-600 hover:text-white transition"
+                >
+                    <Settings className="w-6 h-6" />
+                </button>
                 <div className="bg-blue-600/20 p-6 rounded-full mb-8 animate-pulse">
                     <Car className="w-16 h-16 text-blue-500" />
                 </div>
@@ -56,6 +71,7 @@ export const Dashboard: React.FC = () => {
                 >
                     <Play className="fill-current" /> START DRIVE
                 </button>
+                <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
             </div>
         );
     }
@@ -68,18 +84,12 @@ export const Dashboard: React.FC = () => {
                     <Car className="text-blue-500" /> DriftGuard
                 </h1>
                 <button
-                    onClick={() => setDebugMode(!debugMode)}
+                    onClick={() => setIsSettingsOpen(true)}
                     className="p-2 text-gray-600 hover:text-white transition"
                 >
                     <Settings className="w-5 h-5" />
                 </button>
             </div>
-
-            {/* Vision Feed (Toggleable in Debug, Hidden or Small otherwise? 
-                For PoC, let's keep it visible but styled if Debug, otherwise hidden or minimized?
-                Actually, the requirement says "Shows real-time alerts", and VisionGuard has "Status Overlay".
-                Let's show VisionGuard always but styled nicely.
-            */}
 
             {/* Vision Feed (Always mounted to keep state, toggled visibility) */}
             <div className={`transition-all duration-300 overflow-hidden ${debugMode ? 'mb-6 opacity-100 h-64' : 'h-32 opacity-80 mb-6 mx-auto w-32 rounded-lg'}`}>
@@ -97,16 +107,18 @@ export const Dashboard: React.FC = () => {
                 )}
             </div>
 
-            {/* Emergency Controls */}
-            <div className="mt-auto w-full max-w-md mx-auto">
-                <EmergencyButton />
+            {/* Voice Assistant */}
+            <div className="mb-4">
+                <VoiceAssistant apiKey={apiKey} />
             </div>
 
-            {/* Hidden VisionGuard if not in debug mode to keep logic running? 
-                Wait, if I hide it with h-0 overflow-hidden it is still mounted. 
-                But I actually want the user to see their face maybe? 
-                Let's allow it to be collapsed.
-            */}
+            {/* Emergency Controls */}
+            <div className="mt-auto w-full max-w-md mx-auto">
+                <EmergencyButton onEditContact={() => setIsSettingsOpen(true)} />
+            </div>
+
+            {/* Modals */}
+            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
 
         </div>
     );

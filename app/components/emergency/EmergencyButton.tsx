@@ -1,21 +1,29 @@
 import React, { useState } from 'react';
-import { Phone, AlertTriangle } from 'lucide-react';
+import { Phone, AlertTriangle, Edit2 } from 'lucide-react';
+import { useDriverStore } from '@/app/store/useDriverStore';
 
-export const EmergencyButton: React.FC = () => {
+interface EmergencyButtonProps {
+    onEditContact: () => void;
+}
+
+export const EmergencyButton: React.FC<EmergencyButtonProps> = ({ onEditContact }) => {
     const [showModal, setShowModal] = useState(false);
     const [isCalling, setIsCalling] = useState(false);
+    const { emergencyContact } = useDriverStore();
+    const contactNumber = emergencyContact || "Emergency Services";
 
     const handleConfirm = async () => {
         setIsCalling(true);
         try {
             await fetch('/api/emergency/trigger', {
                 method: 'POST',
+                body: JSON.stringify({ contact: contactNumber })
             });
             // Mock delay
             setTimeout(() => {
                 setIsCalling(false);
                 setShowModal(false);
-                alert("Emergency services notified (Mock).");
+                alert(`Calling ${contactNumber}... (Mock)`);
             }, 2000);
         } catch (error) {
             console.error("Failed to trigger emergency", error);
@@ -41,8 +49,15 @@ export const EmergencyButton: React.FC = () => {
                                 <AlertTriangle className="w-12 h-12 text-red-500" />
                             </div>
                             <h3 className="text-2xl font-bold text-white mb-2">Confirm SOS?</h3>
-                            <p className="text-gray-400 mb-6">
-                                This will alert your emergency contacts and share your location.
+                            <p className="text-gray-400 mb-6 flex items-center justify-center gap-2">
+                                Calling <span className="text-white font-bold">{contactNumber}</span>
+                                <button
+                                    onClick={() => { setShowModal(false); onEditContact(); }}
+                                    className="text-blue-400 hover:text-blue-300 p-1"
+                                    title="Edit Number"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </button>
                             </p>
 
                             <div className="flex w-full gap-3">

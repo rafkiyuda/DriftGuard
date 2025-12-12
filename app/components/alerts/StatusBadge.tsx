@@ -1,3 +1,4 @@
+import React from 'react';
 import { DriverStatus } from "@/app/types";
 import { STATUS_COLORS, STATUS_MESSAGES } from "@/app/lib/constants";
 import { AlertCircle, CheckCircle, Moon, EyeOff } from "lucide-react";
@@ -6,7 +7,7 @@ interface StatusBadgeProps {
     status: DriverStatus;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(({ status }) => {
     const colorClass = STATUS_COLORS[status] || 'bg-gray-500';
     const message = STATUS_MESSAGES[status];
 
@@ -44,4 +45,4 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
             </div>
         </div>
     );
-};
+});
